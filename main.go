@@ -42,6 +42,8 @@ func main() {
 
 		if message != "" && containsStupidQuestion(message) {
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "На рынке Хопа!")
+			reply.ReplyToMessageID = update.Message.MessageID
+			
 			_, err := bot.Send(reply)
 			if err != nil {
 				log.Println(err)
