@@ -51,6 +51,8 @@ func main() {
 }
 
 func containsStupidQuestion(message string) bool {
-	var re = regexp.MustCompile(`где.*купить.*\?|где.*найти.*\?|где.*прода[её]тся.*\?`)
+	var re = regexp.MustCompile(
+		`где.*купить.*\?|где.*найти.*\?|где.*прода[её]тся.*\?|где.*починить.*\?|где.*посмотреть.*\?`,
+	)
 	return re.MatchString(strings.ToLower(message))
 }
