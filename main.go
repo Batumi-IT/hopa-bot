@@ -49,12 +49,29 @@ func main() {
 				log.Println(err)
 			}
 		}
+		
+		if message != "" && containsSmartQuestion(message) {
+			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "Держи ссылку с адресом рынка Хопа, раз в гугле забанили: https://goo.gl/maps/aqN4rzapdDXvRJNW9")
+			reply.ReplyToMessageID = update.Message.MessageID
+			
+			_, err := bot.Send(reply)
+			if err != nil {
+				log.Println(err)
+			}
+		}
 	}
 }
 
 func containsStupidQuestion(message string) bool {
 	var re = regexp.MustCompile(
 		`где.*купить.*\?|где.*найти.*\?|где.*прода[её]тся.*\?|где.*починить.*\?|где.*посмотреть.*\?`,
+	)
+	return re.MatchString(strings.ToLower(message))
+}
+
+func containsSmartQuestion(message string) bool {
+	var re = regexp.MustCompile(
+		`где.*хопа.*\?|как.*хопа.*\?|где.*хопу.*\?|как.*хопу.*\?`,
 	)
 	return re.MatchString(strings.ToLower(message))
 }
