@@ -57,10 +57,14 @@ func main() {
 
 		// Note: add switch in case there will be more checks in the future
 		switch check {
-		case Checks{Stupid: false, Smart: false}:
-			replyMessage = "На рынке Хопа!"
 		case Checks{Stupid: true, Smart: false}:
-			replyMessage = "Держи ссылку с адресом рынка Хопа, раз в гугле забанили: https://goo.gl/maps/aqN4rzapdDXvRJNW9"
+			replyMessage = "На рынке Хопа!"
+		case Checks{Stupid: false, Smart: true}:
+			replyMessage = "Держи ссылку с адресом рынка Хопа, раз в гугле забанили:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
+		case Checks{Stupid: true, Smart: true}:
+			replyMessage = "Хопа на рынке Хопа! Вот, ну:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
+		default:
+			continue
 		}
 
 		if replyMessage != "" {
