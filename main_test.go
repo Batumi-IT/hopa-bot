@@ -57,3 +57,51 @@ func Test_containsStupidQuestion(t *testing.T) {
 		})
 	}
 }
+
+func Test_containsSmartQuestion(t *testing.T) {
+	type args struct {
+		message string
+	}
+	tests := []struct {
+		name    string
+		message string
+		want    bool
+	}{
+		{
+			name:    "1",
+			message: "Где найти рынок Хопа?",
+			want:    true,
+		},
+		{
+			name:    "2",
+			message: "Как попасть на Хопу?",
+			want:    true,
+		},
+		{
+			name:    "3",
+			message: "Как добраться до Хопа?",
+			want:    true,
+		},
+		{
+			name:    "4",
+			message: "Где найти рынок Хопу?",
+			want:    true,
+		}, {
+			name:    "5",
+			message: "Как добраться до Хопы?",
+			want:    true,
+		},
+		{
+			name:    "6f",
+			message: "Ыхыхы ахаха?",
+			want:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := containsSmartQuestion(tt.message); got != tt.want {
+				t.Errorf("containsSmartQuestion() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
