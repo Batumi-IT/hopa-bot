@@ -55,7 +55,7 @@ func main() {
 
 		var replyMessage string
 
-		// Note: add switch in case where will be more checks in the future
+		// Note: add switch in case there will be more checks in the future
 		switch check {
 		case Checks{Stupid: false, Smart: false}:
 			replyMessage = "На рынке Хопа!"
