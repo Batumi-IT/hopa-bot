@@ -84,7 +84,7 @@ func containsStupidQuestion(message string) bool {
 
 func containsSmartQuestion(message string) bool {
 	var re = regexp.MustCompile(
-		`где.*хопа.*\?|как.*хопа.*\?|где.*хопу.*\?|как.*хопу.*\?`,
+		`где.*хоп[ау].*\?|как.*хоп[ау].*\?`,
 	)
 	return re.MatchString(strings.ToLower(message))
 }
