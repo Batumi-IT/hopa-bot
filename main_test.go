@@ -10,32 +10,32 @@ func Test_containsStupidQuestion(t *testing.T) {
 	}{
 		{
 			name:    "1",
-			message: "Где купить?",
+			message: "где купить?",
 			want:    true,
 		},
 		{
 			name:    "2",
-			message: "Где найти?",
+			message: "где найти?",
 			want:    true,
 		},
 		{
 			name:    "3",
-			message: "Где продаётся?",
+			message: "где продаётся?",
 			want:    true,
 		},
 		{
 			name:    "4",
-			message: "Где продается?",
+			message: "где продается?",
 			want:    true,
 		},
 		{
 			name:    "5",
-			message: "Где починить?",
+			message: "где починить?",
 			want:    true,
 		},
 		{
 			name:    "6",
-			message: "Где посмотреть?",
+			message: "где посмотреть?",
 			want:    true,
 		},
 		{
@@ -45,7 +45,7 @@ func Test_containsStupidQuestion(t *testing.T) {
 		},
 		{
 			name:    "2f",
-			message: "где деньги Лебовски?",
+			message: "где деньги лебовски?",
 			want:    false,
 		},
 	}
@@ -59,9 +59,6 @@ func Test_containsStupidQuestion(t *testing.T) {
 }
 
 func Test_containsSmartQuestion(t *testing.T) {
-	type args struct {
-		message string
-	}
 	tests := []struct {
 		name    string
 		message string
@@ -69,31 +66,31 @@ func Test_containsSmartQuestion(t *testing.T) {
 	}{
 		{
 			name:    "1",
-			message: "Где найти рынок Хопа?",
+			message: "где найти рынок хопа?",
 			want:    true,
 		},
 		{
 			name:    "2",
-			message: "Как попасть на Хопу?",
+			message: "как попасть на хопу?",
 			want:    true,
 		},
 		{
 			name:    "3",
-			message: "Как добраться до Хопа?",
+			message: "как добраться до хопа?",
 			want:    true,
 		},
 		{
 			name:    "4",
-			message: "Где найти рынок Хопу?",
+			message: "где найти рынок хопу?",
 			want:    true,
 		}, {
 			name:    "5",
-			message: "Как добраться до Хопы?",
+			message: "как добраться до хопы?",
 			want:    true,
 		},
 		{
 			name:    "6f",
-			message: "Ыхыхы ахаха?",
+			message: "ыхыхы ахаха?",
 			want:    false,
 		},
 	}
@@ -101,6 +98,47 @@ func Test_containsSmartQuestion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := containsSmartQuestion(tt.message); got != tt.want {
 				t.Errorf("containsSmartQuestion() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_generateReply(t *testing.T) {
+	tests := []struct {
+		name    string
+		message string
+		want    string
+	}{
+		{
+			name:    "1",
+			message: "Где купить?",
+			want:    "На рынке Хопа!",
+		},
+		{
+			name:    "2",
+			message: "Где найти?",
+			want:    "На рынке Хопа!",
+		},
+		{
+			name:    "3",
+			message: "Где рынок хопа?",
+			want:    "Держи ссылку с адресом рынка Хопа, раз в гугле забанили:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9",
+		},
+		{
+			name:    "4",
+			message: "где найти хопу?",
+			want:    "Хопа на рынке Хопа! Вот, ну:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9",
+		},
+		{
+			name:    "f5",
+			message: "Ыхыхы ахаха?",
+			want:    "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := generateReply(tt.message); got != tt.want {
+				t.Errorf("generateReply() = %v, want %v", got, tt.want)
 			}
 		})
 	}

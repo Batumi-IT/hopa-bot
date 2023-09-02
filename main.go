@@ -48,34 +48,38 @@ func main() {
 			continue
 		}
 
-		check := Checks{
-			Stupid: containsStupidQuestion(message),
-			Smart:  containsSmartQuestion(message),
-		}
-
-		var replyMessage string
-
-		// Note: add switch in case there will be more checks in the future
-		switch check {
-		case Checks{Stupid: true, Smart: false}:
-			replyMessage = "На рынке Хопа!"
-		case Checks{Stupid: false, Smart: true}:
-			replyMessage = "Держи ссылку с адресом рынка Хопа, раз в гугле забанили:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
-		case Checks{Stupid: true, Smart: true}:
-			replyMessage = "Хопа на рынке Хопа! Вот, ну:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
-		default:
+		replyMessage := generateReply(message)
+		if replyMessage == "" {
 			continue
 		}
 
-		if replyMessage != "" {
-			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyMessage)
-			reply.ReplyToMessageID = update.Message.MessageID
+		reply := tgbotapi.NewMessage(update.Message.Chat.ID, replyMessage)
+		reply.ReplyToMessageID = update.Message.MessageID
 
-			_, err := bot.Send(reply)
-			if err != nil {
-				log.Println(err)
-			}
+		_, err := bot.Send(reply)
+		if err != nil {
+			log.Println(err)
 		}
+	}
+}
+
+func generateReply(message string) string {
+	message = strings.ToLower(message)
+	check := Checks{
+		Stupid: containsStupidQuestion(message),
+		Smart:  containsSmartQuestion(message),
+	}
+
+	// Note: add switch in case there will be more checks in the future
+	switch check {
+	case Checks{Stupid: true, Smart: false}:
+		return "На рынке Хопа!"
+	case Checks{Stupid: false, Smart: true}:
+		return "Держи ссылку с адресом рынка Хопа, раз в гугле забанили:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
+	case Checks{Stupid: true, Smart: true}:
+		return "Хопа на рынке Хопа! Вот, ну:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
+	default:
+		return ""
 	}
 }
 
@@ -83,12 +87,12 @@ func containsStupidQuestion(message string) bool {
 	var re = regexp.MustCompile(
 		`где.*купить.*\?|где.*найти.*\?|где.*прода[её]тся.*\?|где.*починить.*\?|где.*посмотреть.*\?`,
 	)
-	return re.MatchString(strings.ToLower(message))
+	return re.MatchString(message)
 }
 
 func containsSmartQuestion(message string) bool {
 	var re = regexp.MustCompile(
 		`где.*хоп[ау].*\?|как.*хоп[ауы].*\?`,
 	)
-	return re.MatchString(strings.ToLower(message))
+	return re.MatchString(message)
 }
