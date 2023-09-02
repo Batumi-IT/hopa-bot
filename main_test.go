@@ -59,9 +59,6 @@ func Test_containsStupidQuestion(t *testing.T) {
 }
 
 func Test_containsSmartQuestion(t *testing.T) {
-	type args struct {
-		message string
-	}
 	tests := []struct {
 		name    string
 		message string
