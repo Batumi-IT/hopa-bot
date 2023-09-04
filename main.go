@@ -65,34 +65,37 @@ func main() {
 
 func generateReply(message string) string {
 	message = strings.ToLower(message)
-	check := Checks{
-		Stupid: containsStupidQuestion(message),
-		Smart:  containsSmartQuestion(message),
-	}
 
-	// Note: add switch in case there will be more checks in the future
-	switch check {
-	case Checks{Stupid: true, Smart: false}:
-		return "На рынке Хопа!"
-	case Checks{Stupid: false, Smart: true}:
-		return "Держи ссылку с адресом рынка Хопа, раз в гугле забанили:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
-	case Checks{Stupid: true, Smart: true}:
+	// Note: add if-else statement in case there will be more checks in the future
+	if stupidHopaBazarQuestion(message) && smartHopaBazarQuestion(message) {
 		return "Хопа на рынке Хопа! Вот, ну:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
-	default:
-		return ""
+	} else if smartHopaBazarQuestion(message) {
+		return "Держи ссылку с адресом рынка Хопа, раз в гугле забанили:\nhttps://goo.gl/maps/aqN4rzapdDXvRJNW9"
+	} else if stupidHopaBazarQuestion(message) {
+		return "На рынке Хопа!"
+	} else if toxicPositivity(message) {
+		return "Идите на хуй со своей токсичной позитивностью!"
 	}
+	return ""
 }
 
-func containsStupidQuestion(message string) bool {
+func stupidHopaBazarQuestion(message string) bool {
 	var re = regexp.MustCompile(
 		`где.*купить.*\?|где.*найти.*\?|где.*прода[её]тся.*\?|где.*починить.*\?|где.*посмотреть.*\?`,
 	)
 	return re.MatchString(message)
 }
 
-func containsSmartQuestion(message string) bool {
+func smartHopaBazarQuestion(message string) bool {
 	var re = regexp.MustCompile(
 		`где.*хоп[ау].*\?|как.*хоп[ауы].*\?`,
+	)
+	return re.MatchString(message)
+}
+
+func toxicPositivity(message string) bool {
+	var re = regexp.MustCompile(
+		`бы(?:ть|л|ла|ли).*позитивн`,
 	)
 	return re.MatchString(message)
 }
