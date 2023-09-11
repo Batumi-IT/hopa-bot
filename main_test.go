@@ -48,6 +48,11 @@ func Test_containsStupidQuestion(t *testing.T) {
 			message: "где деньги лебовски?",
 			want:    false,
 		},
+		{
+			name:    "7",
+			message: "а без покрытия чугунные сковородки кто-то видел в продаже?",
+			want:    true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
