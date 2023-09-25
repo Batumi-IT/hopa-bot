@@ -35,7 +35,7 @@ func Test_containsStupidQuestion(t *testing.T) {
 		},
 		{
 			name:    "6",
-			message: "где посмотреть?",
+			message: "   где   посмотреть?",
 			want:    true,
 		},
 		{
@@ -66,6 +66,16 @@ func Test_containsStupidQuestion(t *testing.T) {
 		{
 			name:    "3f",
 			message: "как пройти в библиотеку?",
+			want:    false,
+		},
+		{
+			name:    "4f",
+			message: "амвппв найти?",
+			want:    false,
+		},
+		{
+			name:    "5f",
+			message: "гдерь найти?",
 			want:    false,
 		},
 	}
@@ -111,6 +121,21 @@ func Test_containsSmartQuestion(t *testing.T) {
 		{
 			name:    "6f",
 			message: "ыхыхы ахаха?",
+			want:    false,
+		},
+		{
+			name:    "7f",
+			message: "когде хопы?",
+			want:    false,
+		},
+		{
+			name:    "8f",
+			message: "акак хопы?",
+			want:    false,
+		},
+		{
+			name:    "9f",
+			message: "акака хопы?",
 			want:    false,
 		},
 	}
