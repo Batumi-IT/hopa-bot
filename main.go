@@ -85,14 +85,14 @@ func generateReply(message string) string {
 
 func containsStupidQuestion(message string) bool {
 	var re = regexp.MustCompile(
-		`(?:где|в).*(?:купить|найти|прода[её]тся|починить|посмотреть|продаже).*\?`,
+		`(\s|^)(?:где|в)\s.*(?:купить|найти|прода[её]тся|починить|посмотреть|продаже).*\?`,
 	)
 	return re.MatchString(message)
 }
 
 func containsSmartQuestion(message string) bool {
 	var re = regexp.MustCompile(
-		`(?:где|как).*(?:хоп[ау]|хоп[ауы]).*\?`,
+		`(\s|^)(?:где|как)\s.*(?:хоп[ау]|хоп[ауы]).*\?`,
 	)
 	return re.MatchString(message)
 }
