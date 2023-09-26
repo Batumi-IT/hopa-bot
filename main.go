@@ -85,7 +85,7 @@ func generateReply(message string) string {
 
 func containsStupidQuestion(message string) bool {
 	var re = regexp.MustCompile(
-		`(\s|^)(?:где|в)\s.*(?:купить|найти|прода[её]тся|починить|посмотреть|продаже).*\?`,
+		`(\s|^)(?:где|в)\s.*(?:купи(ть|л|ли|ла)|на(йти|шла|ш[её]л)|прода[её]тся|починить|посмотреть|продаже|доста(ть|л|ли|ла)|взя(ть|л|ли|ла)|покупа(л|ли|ла)).*\?`,
 	)
 	return re.MatchString(message)
 }
