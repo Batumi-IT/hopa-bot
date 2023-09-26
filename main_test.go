@@ -78,6 +78,46 @@ func Test_containsStupidQuestion(t *testing.T) {
 			message: "гдерь найти?",
 			want:    false,
 		},
+		{
+			name:    "10",
+			message: "где взять б/у машину?",
+			want:    true,
+		},
+		{
+			name:    "11",
+			message: "где ты взяла б/у Кирилла?",
+			want:    true,
+		},
+		{
+			name:    "12",
+			message: "где ты нашёл рыбью голову?",
+			want:    true,
+		},
+		{
+			name:    "13",
+			message: "а где ты покупала морскую слизь?",
+			want:    true,
+		},
+		{
+			name:    "14",
+			message: "а где ты купила его?",
+			want:    true,
+		},
+		{
+			name:    "15",
+			message: "а где вы купили его?",
+			want:    true,
+		},
+		{
+			name:    "16",
+			message: "а где достали это?",
+			want:    true,
+		},
+		{
+			name:    "17",
+			message: "а где достать пиво?",
+			want:    true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
