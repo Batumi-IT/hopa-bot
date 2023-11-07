@@ -17,6 +17,11 @@ type Check struct {
 	Smart  bool
 }
 
+const (
+	// AiMessageMaxLength for OpenAI (in characters)
+	AiMessageMaxLength = 200
+)
+
 func main() {
 	log.Println("Hopa bot started")
 	defer log.Println("Hopa bot stopped")
@@ -63,15 +68,7 @@ func main() {
 			continue
 		}
 
-		// TODO: Add rate limit by user id
-		// First try to create answer with OpenAI
-		replyMessage, err := generateOpenAiReply(openaiClient, message)
-		if err != nil {
-			log.Println(err)
-			// If OpenAI fails, generate answer manually
-			replyMessage = generateReply(message, check)
-		}
-
+		replyMessage := generateReplyMessage(openaiClient, message, check)
 		if replyMessage == "" {
 			continue
 		}
@@ -152,4 +149,20 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 	}
 
 	return resp.Choices[0].Message.Content, nil
+}
+
+func generateReplyMessage(client *openai.Client, message string, check Check) string {
+	if len(message) > AiMessageMaxLength {
+		return generateReply(message, check)
+	}
+
+	// TODO: Add rate limit by user id
+	reply, err := generateOpenAiReply(client, message)
+	if err != nil {
+		log.Println(err)
+		// If OpenAI fails, generate answer manually
+		reply = generateReply(message, check)
+	}
+
+	return reply
 }
