@@ -22,3 +22,6 @@ go.work
 
 # Ignore IDE
 /.idea
+
+# Ignore env
+.env
