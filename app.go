@@ -10,6 +10,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type App struct {
@@ -50,7 +51,7 @@ func (app *App) run() {
 			continue
 		}
 
-		replyMessage := app.generateReplyMessage(message, check)
+		replyMessage := app.generateReplyMessage(message, check, update.Message.From.ID)
 		if replyMessage == "" {
 			continue
 		}
@@ -65,25 +66,52 @@ func (app *App) run() {
 	}
 }
 
-func (app *App) generateReplyMessage(message string, check Check) string {
+func (app *App) generateReplyMessage(message string, check Check, userID int) string {
 	if len(message) > AiMessageMaxLength {
 		return generateReply(check)
 	}
 
 	ctx := context.Background()
 
-	// TODO: Add rate limit by user id with redis
-	val, err := app.RedisClient.Get(ctx, "global:ai_total_rate_limit").Result()
+	// If global limit is reached for today or user limit is reached, generate answer manually
+	globalLimit, err := app.RedisLimiter.Allow(
+		ctx,
+		"global:ai_total_rate_limit",
+		perDay(AiTotalRateLimitPerDay),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("global:ai_total_rate_limit", val)
+	userDailyLimit, err := app.RedisLimiter.Allow(
+		ctx,
+		fmt.Sprintf("user:%d:ai_daily_limit", userID),
+		perDay(AiUserRateLimitPerDay),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if globalLimit.Allowed == 0 || userDailyLimit.Allowed == 0 {
+		return generateReply(check)
+	}
+
+	// If users minute limit is reached - escort him to the nearest hyi :)
+	userMinuteLimit, err := app.RedisLimiter.Allow(
+		ctx,
+		fmt.Sprintf("user:%d:ai_minute_limit", userID),
+		redis_rate.PerMinute(AiUserRateLimitPerMinute),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if userMinuteLimit.Allowed == 0 {
+		return "Error 429: Пошёл на хуй, пёс!"
+	}
 
 	reply, err := generateOpenAiReply(app.OpenaiClient, message)
 	if err != nil {
 		log.Println(err)
 		// If OpenAI fails, generate answer manually
-		reply = generateReply(check)
+		return generateReply(check)
 	}
 
 	return reply
@@ -153,4 +181,13 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 	}
 
 	return resp.Choices[0].Message.Content, nil
+}
+
+// perDay is a missing function in redis_rate package
+func perDay(rate int) redis_rate.Limit {
+	return redis_rate.Limit{
+		Rate:   rate,
+		Period: 24 * time.Hour,
+		Burst:  rate,
+	}
 }
