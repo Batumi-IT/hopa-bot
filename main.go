@@ -16,6 +16,7 @@ const (
 )
 
 func main() {
+	// TODO: add validation for all env variables with viper package
 	log.Println("Hopa bot started")
 	defer log.Println("Hopa bot stopped")
 
