@@ -92,7 +92,7 @@ func generateCheck(message string) Check {
 	return c
 }
 
-func generateReply(message string, check Check) string {
+func generateReply(check Check) string {
 	switch check {
 	case Check{Stupid: true, Smart: false}:
 		return "На рынке Хопа!"
@@ -153,7 +153,7 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 
 func generateReplyMessage(client *openai.Client, message string, check Check) string {
 	if len(message) > AiMessageMaxLength {
-		return generateReply(message, check)
+		return generateReply(check)
 	}
 
 	// TODO: Add rate limit by user id
@@ -161,7 +161,7 @@ func generateReplyMessage(client *openai.Client, message string, check Check) st
 	if err != nil {
 		log.Println(err)
 		// If OpenAI fails, generate answer manually
-		reply = generateReply(message, check)
+		reply = generateReply(check)
 	}
 
 	return reply
