@@ -13,6 +13,7 @@ type RedisConfig struct {
 	Host     string
 	Port     string
 	Password string
+	User     string
 }
 
 // Connect to Redis and return a Redis client.
@@ -33,6 +34,7 @@ func connectToRedis(conf RedisConfig) *redis.Client {
 		rdb := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", conf.Host, conf.Port),
 			Password: conf.Password,
+			Username: conf.User,
 			DB:       0,
 		})
 		_, err := rdb.Ping(ctx).Result()
