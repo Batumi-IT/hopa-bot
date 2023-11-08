@@ -5,3 +5,9 @@ up:
 down:
 	echo "Stopping Docker images..."
 	docker compose down
+
+lint:
+	golangci-lint run
+
+test:
+	go test ./... -v
