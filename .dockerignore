@@ -1,0 +1,6 @@
+*.test
+*.out
+go.work
+/.github
+*.md
+.env
