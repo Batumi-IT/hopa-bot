@@ -20,7 +20,7 @@ type RedisConfig struct {
 // Wait for the connection to be established before returning.
 func connectToRedis(conf RedisConfig) *redis.Client {
 	fmt.Printf("Connecting to Redis at %s:%s@%s:%s", conf.User, conf.Password, conf.Host, conf.Port)
-	const requestTimeout = 3 * time.Second
+	const requestTimeout = 10 * time.Second
 
 	const maxRetries = 5
 
@@ -41,6 +41,7 @@ func connectToRedis(conf RedisConfig) *redis.Client {
 		_, err := rdb.Ping(ctx).Result()
 
 		if err != nil {
+			log.Println(err)
 			log.Println("Redis not yet ready...")
 			counts++
 		} else {
