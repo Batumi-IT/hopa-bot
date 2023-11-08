@@ -228,3 +228,39 @@ func Test_generateReply(t *testing.T) {
 		})
 	}
 }
+
+func Test_generateCheck(t *testing.T) {
+	tests := []struct {
+		name    string
+		message string
+		want    Check
+	}{
+		{
+			name:    "1",
+			message: "где купить?",
+			want:    Check{Stupid: true, Smart: false},
+		},
+		{
+			name:    "2",
+			message: "где найти?",
+			want:    Check{Stupid: true, Smart: false},
+		},
+		{
+			name:    "3",
+			message: "где найти рынок хопа?",
+			want:    Check{Stupid: true, Smart: true},
+		},
+		{
+			name:    "f4",
+			message: "ыхыхы ахаха?",
+			want:    Check{Stupid: false, Smart: false},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := generateCheck(tt.message); got != tt.want {
+				t.Errorf("generateCheck() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
