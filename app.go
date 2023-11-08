@@ -73,6 +73,7 @@ func (app *App) generateReplyMessage(message string, check Check, userID int) st
 
 	ctx := context.Background()
 
+	// TODO: Replace `redis_rate` with something better
 	// If global limit is reached for today or user limit is reached, generate answer manually
 	globalLimit, err := app.RedisLimiter.Allow(
 		ctx,
