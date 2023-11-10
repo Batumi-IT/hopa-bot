@@ -6,7 +6,7 @@ require (
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/redis/go-redis/v9 v9.3.0
-	github.com/sashabaranov/go-openai v1.17.2
+	github.com/sashabaranov/go-openai v1.17.5
 )
 
 require (
