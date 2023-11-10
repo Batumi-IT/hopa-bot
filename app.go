@@ -41,7 +41,7 @@ func (app *App) run() {
 			continue
 		}
 
-		message := strings.ToLower(update.Message.Text)
+		message := update.Message.Text
 		if message == "" {
 			continue
 		}
@@ -119,9 +119,10 @@ func (app *App) generateReplyMessage(message string, check Check, userID int) st
 }
 
 func generateCheck(message string) Check {
+	m := strings.ToLower(message)
 	return Check{
-		Stupid: containsStupidQuestion(message),
-		Smart:  containsSmartQuestion(message),
+		Stupid: containsStupidQuestion(m),
+		Smart:  containsSmartQuestion(m),
 	}
 }
 
