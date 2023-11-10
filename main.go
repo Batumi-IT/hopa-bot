@@ -35,6 +35,7 @@ func main() {
 		log.Panic(err)
 	}
 
+	// TODO: Replace with backoff
 	rdb := connectToRedis(RedisConfig{
 		Host:     os.Getenv("REDIS_HOST"),
 		Port:     os.Getenv("REDIS_PORT"),

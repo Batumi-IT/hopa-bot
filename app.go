@@ -41,7 +41,7 @@ func (app *App) run() {
 			continue
 		}
 
-		message := strings.ToLower(update.Message.Text)
+		message := update.Message.Text
 		if message == "" {
 			continue
 		}
@@ -119,9 +119,10 @@ func (app *App) generateReplyMessage(message string, check Check, userID int) st
 }
 
 func generateCheck(message string) Check {
+	m := strings.ToLower(message)
 	return Check{
-		Stupid: containsStupidQuestion(message),
-		Smart:  containsSmartQuestion(message),
+		Stupid: containsStupidQuestion(m),
+		Smart:  containsSmartQuestion(m),
 	}
 }
 
@@ -159,8 +160,13 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 			Model: openai.GPT3Dot5Turbo1106,
 			Messages: []openai.ChatCompletionMessage{
 				{
-					Role:    openai.ChatMessageRoleSystem,
-					Content: "Help people find what they are looking for at the рынок Хопа in Batumi, answering in Russian. Only if user ask about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. Answer sarcastically with jokes, puns, prejudices about clothing markets. Answer 1-2 sentences.",
+					Role: openai.ChatMessageRoleSystem,
+					Content: "You help people find what they are looking for in the telegram chat. " +
+						"You will suggest the рынок Хопа in Batumi for any request, answering in Russian. " +
+						"Only if the user asks about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
+						"Answer sarcastically, with jokes, puns, prejudices about clothing markets. " +
+						"If someone asks where to find something on Хопа - you can randomly generate the market row number and the store. " +
+						"Answer 1-2 sentences.",
 				},
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -171,7 +177,7 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 			MaxTokens:        128,
 			TopP:             1,
 			Stop:             []string{"\n"},
-			FrequencyPenalty: 0,
+			FrequencyPenalty: 0.5,
 			PresencePenalty:  0.5,
 		},
 	)
