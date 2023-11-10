@@ -176,7 +176,7 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 			MaxTokens:        128,
 			TopP:             1,
 			Stop:             []string{"\n"},
-			FrequencyPenalty: 0,
+			FrequencyPenalty: 0.5,
 			PresencePenalty:  0.5,
 		},
 	)
