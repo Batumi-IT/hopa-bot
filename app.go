@@ -154,8 +154,11 @@ func containsSmartQuestion(message string) bool {
 }
 
 func generateOpenAiReply(client *openai.Client, message string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	resp, err := client.CreateChatCompletion(
-		context.Background(),
+		ctx,
 		openai.ChatCompletionRequest{
 			Model: openai.GPT3Dot5Turbo1106,
 			Messages: []openai.ChatCompletionMessage{
