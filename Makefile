@@ -4,7 +4,7 @@ up:
 
 up-build:
 	echo "Starting Docker images..."
-	docker compose up --build
+	docker compose up --build --remove-orphans
 
 down:
 	echo "Stopping Docker images..."
