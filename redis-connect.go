@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"log"
 	"time"
 
@@ -19,42 +20,36 @@ type RedisConfig struct {
 // Connect to Redis and return a Redis client.
 // Wait for the connection to be established before returning.
 func connectToRedis(conf RedisConfig) *redis.Client {
-	const requestTimeout = 10 * time.Second
+	bf := backoff.NewExponentialBackOff()
+	bf.InitialInterval = 10 * time.Second
+	bf.MaxInterval = 25 * time.Second
+	bf.MaxElapsedTime = 90 * time.Second
 
-	const maxRetries = 5
+	rdb, err := backoff.RetryWithData[*redis.Client](func() (*redis.Client, error) {
+		ctx, cancel := context.WithTimeout(context.Background(), bf.InitialInterval)
+		defer cancel()
 
-	const retryDelay = 3 * time.Second
-
-	var counts uint8
-
-	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
-	defer cancel()
-
-	for {
-		rdb := redis.NewClient(&redis.Options{
+		conn := redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", conf.Host, conf.Port),
 			Password: conf.Password,
 			Username: conf.User,
 			DB:       0,
 		})
-		_, err := rdb.Ping(ctx).Result()
+		_, err := conn.Ping(ctx).Result()
 
 		if err != nil {
-			log.Println(err)
 			log.Println("Redis not yet ready...")
-			counts++
-		} else {
-			log.Println("Connected to Redis!")
-			return rdb
+			return nil, err
 		}
+		log.Println("Connected to Redis!")
+		return conn, nil
+	}, bf)
 
-		if counts > maxRetries {
-			log.Fatalln(err)
-			return nil
-		}
-
-		time.Sleep(retryDelay)
-
-		continue
+	if err != nil {
+		log.Fatalln(err)
+		return nil
 	}
+
+	return rdb
+
 }

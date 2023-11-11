@@ -17,7 +17,7 @@ const (
 
 func main() {
 	// TODO: add validation for all env variables with viper package
-	log.Println("Hopa bot started")
+	log.Println("Hopa bot is started")
 	defer log.Println("Hopa bot stopped")
 
 	tgToken := os.Getenv("TELEGRAM_TOKEN")
@@ -35,7 +35,6 @@ func main() {
 		log.Panic(err)
 	}
 
-	// TODO: Replace with backoff
 	rdb := connectToRedis(RedisConfig{
 		Host:     os.Getenv("REDIS_HOST"),
 		Port:     os.Getenv("REDIS_PORT"),
@@ -50,5 +49,6 @@ func main() {
 		RedisLimiter: redis_rate.NewLimiter(rdb),
 	}
 
+	log.Println("Hopa bot is running")
 	app.run()
 }
