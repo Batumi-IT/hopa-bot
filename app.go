@@ -176,12 +176,12 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 					Content: message,
 				},
 			},
-			Temperature:      1.1,
-			MaxTokens:        128,
+			Temperature:      1.05,
+			MaxTokens:        200,
 			TopP:             1,
 			Stop:             []string{"\n"},
-			FrequencyPenalty: 0.5,
-			PresencePenalty:  0.5,
+			FrequencyPenalty: 0.4,
+			PresencePenalty:  0.4,
 		},
 	)
 
