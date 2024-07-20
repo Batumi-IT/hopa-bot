@@ -1,13 +1,13 @@
 module github.com/Batumi-IT/hopa-bot
 
-go 1.22.0
+go 1.22.3
 
 require (
-	github.com/cenkalti/backoff/v4 v4.2.1
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
-	github.com/redis/go-redis/v9 v9.4.0
-	github.com/sashabaranov/go-openai v1.19.3
+	github.com/redis/go-redis/v9 v9.6.0
+	github.com/sashabaranov/go-openai v1.27.0
 )
 
 require (

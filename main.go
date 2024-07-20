@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	AiMessageMaxLength       = 200 // Max number of symbols to process (OpenAI)
+	AiMessageMaxLength       = 250 // Max number of symbols to process (OpenAI)
 	AiUserRateLimitPerMinute = 5   // Max number of messages per minute per user (OpenAI)
-	AiUserRateLimitPerDay    = 30  // Max number of messages per day per user (OpenAI)
+	AiUserRateLimitPerDay    = 40  // Max number of messages per day per user (OpenAI)
 	AiTotalRateLimitPerDay   = 300 // Total max number of messages per day (OpenAI)
 )
 
