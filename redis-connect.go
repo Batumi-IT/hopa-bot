@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/cenkalti/backoff/v4"
 	"log"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -25,7 +25,7 @@ func connectToRedis(conf RedisConfig) *redis.Client {
 	bf.MaxInterval = 25 * time.Second
 	bf.MaxElapsedTime = 90 * time.Second
 
-	rdb, err := backoff.RetryWithData[*redis.Client](func() (*redis.Client, error) {
+	rdb, err := backoff.RetryWithData(func() (*redis.Client, error) {
 		ctx, cancel := context.WithTimeout(context.Background(), bf.InitialInterval)
 		defer cancel()
 

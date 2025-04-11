@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/go-redis/redis_rate/v10"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/sashabaranov/go-openai"
-	"log"
-	"os"
 )
 
 const (
