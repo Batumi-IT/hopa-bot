@@ -27,6 +27,8 @@ type Check struct {
 }
 
 func (app *App) run() {
+	ctx := context.Background()
+
 	// Set up updates channel
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -47,12 +49,17 @@ func (app *App) run() {
 			continue
 		}
 
+		var isReplyToBot bool
+		if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From != nil {
+			isReplyToBot = update.Message.ReplyToMessage.From.ID == app.TelegramBot.Self.ID
+		}
+
 		check := generateCheck(message)
-		if !(check.Stupid || check.Smart) {
+		if !(check.Stupid || check.Smart) && !isReplyToBot {
 			continue
 		}
 
-		replyMessage := app.generateReplyMessage(message, check, update.Message.From.ID)
+		replyMessage := app.generateReplyMessage(ctx, message, check, update.Message.From.ID, isReplyToBot)
 		if replyMessage == "" {
 			continue
 		}
@@ -67,14 +74,11 @@ func (app *App) run() {
 	}
 }
 
-func (app *App) generateReplyMessage(message string, check Check, userID int) string {
+func (app *App) generateReplyMessage(ctx context.Context, message string, check Check, userID int, isReplyToBot bool) string {
 	if len(message) > AiMessageMaxLength {
 		return generateReply(check)
 	}
 
-	ctx := context.Background()
-
-	// TODO: Replace `redis_rate` with something better
 	// If global limit is reached for today or user limit is reached, generate answer manually
 	globalLimit, err := app.RedisLimiter.Allow(
 		ctx,
@@ -109,7 +113,13 @@ func (app *App) generateReplyMessage(message string, check Check, userID int) st
 		return "Error 429: Пошёл на хуй, пёс!"
 	}
 
-	reply, err := generateOpenAiReply(app.OpenaiClient, message)
+	var reply string
+	if isReplyToBot {
+		reply, err = generateAggressiveOpenAiReply(app.OpenaiClient, message)
+	} else {
+		reply, err = generateOpenAiReply(app.OpenaiClient, message)
+	}
+
 	if err != nil {
 		log.Println(err)
 		// If OpenAI fails, generate answer manually
@@ -117,6 +127,46 @@ func (app *App) generateReplyMessage(message string, check Check, userID int) st
 	}
 
 	return reply
+}
+
+func generateAggressiveOpenAiReply(client *openai.Client, message string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	resp, err := client.CreateChatCompletion(
+		ctx,
+		openai.ChatCompletionRequest{
+			Model: openai.GPT4oMini,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role: openai.ChatMessageRoleSystem,
+					Content: "You are an aggressive assistant in a Telegram chat. " +
+						"Maintain the sarcastic and humorous tone of the Hopa-bot, but respond aggressively to replies. " +
+						"If the user is unkind or rude, swear at them in Russian, using sharp humor and insults. " +
+						"Always keep the context of the рынок Хопа в Батуми. " +
+						"Mock the user, make jokes, and use sharp humor, but stay within the context of the market. " +
+						"Answer in Russian, 1-2 sentences max.",
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: message,
+				},
+			},
+			Temperature:      0.9,
+			MaxTokens:        200,
+			TopP:             1,
+			Stop:             []string{"\n"},
+			FrequencyPenalty: 0.4,
+			PresencePenalty:  0.4,
+		},
+	)
+
+	if err != nil {
+		fmt.Printf("ChatCompletion error: %v\n", err)
+		return "", err
+	}
+
+	return resp.Choices[0].Message.Content, nil
 }
 
 func generateCheck(message string) Check {
@@ -166,7 +216,7 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 				{
 					Role: openai.ChatMessageRoleSystem,
 					Content: "You help people find what they are looking for in the telegram chat. " +
-						"You will suggest the рынок Хопа in Batumi for any request, answering in Russian. " +
+						"You will suggest the рынок Хопа в Батуми for any request, answering in Russian. " +
 						"Only if the user asks about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
 						"Answer sarcastically, with jokes, puns, prejudices about clothing markets. " +
 						"If someone asks where to find something on Хопа - you can randomly generate the market row number and the store. " +
@@ -177,7 +227,7 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 					Content: message,
 				},
 			},
-			Temperature:      1.05,
+			Temperature:      0.85,
 			MaxTokens:        200,
 			TopP:             1,
 			Stop:             []string{"\n"},
