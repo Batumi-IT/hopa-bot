@@ -50,8 +50,10 @@ func (app *App) run() {
 		}
 
 		var isReplyToBot bool
+		var repliedMessageText string
 		if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From != nil {
 			isReplyToBot = update.Message.ReplyToMessage.From.ID == app.TelegramBot.Self.ID
+			repliedMessageText = update.Message.ReplyToMessage.Text
 		}
 
 		check := generateCheck(message)
@@ -59,7 +61,7 @@ func (app *App) run() {
 			continue
 		}
 
-		replyMessage := app.generateReplyMessage(ctx, message, check, update.Message.From.ID, isReplyToBot)
+		replyMessage := app.generateReplyMessage(ctx, message, check, update.Message.From.ID, isReplyToBot, repliedMessageText)
 		if replyMessage == "" {
 			continue
 		}
@@ -74,7 +76,7 @@ func (app *App) run() {
 	}
 }
 
-func (app *App) generateReplyMessage(ctx context.Context, message string, check Check, userID int, isReplyToBot bool) string {
+func (app *App) generateReplyMessage(ctx context.Context, message string, check Check, userID int, isReplyToBot bool, repliedMessageText string) string {
 	if len(message) > AiMessageMaxLength {
 		return generateReply(check)
 	}
@@ -115,7 +117,7 @@ func (app *App) generateReplyMessage(ctx context.Context, message string, check 
 
 	var reply string
 	if isReplyToBot {
-		reply, err = generateAggressiveOpenAiReply(app.OpenaiClient, message)
+		reply, err = generateAggressiveOpenAiReply(app.OpenaiClient, message+"\n\nContext: "+repliedMessageText)
 	} else {
 		reply, err = generateOpenAiReply(app.OpenaiClient, message)
 	}
