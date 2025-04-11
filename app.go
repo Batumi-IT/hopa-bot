@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis_rate/v10"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/redis/go-redis/v9"
-	"github.com/sashabaranov/go-openai"
 	"log"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/go-redis/redis_rate/v10"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/redis/go-redis/v9"
+	"github.com/sashabaranov/go-openai"
 )
 
 type App struct {

@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/cenkalti/backoff/v4"
 	"log"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/redis/go-redis/v9"
 )
 
