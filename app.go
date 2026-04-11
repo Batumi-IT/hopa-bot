@@ -207,7 +207,7 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 	resp, err := client.Chat.Completions.New(
 		ctx,
 		openai.ChatCompletionNewParams{
-			Model: openai.ChatModelGPT4oMini,
+			Model: openai.ChatModelGPT5_4Mini,
 			Messages: []openai.ChatCompletionMessageParamUnion{
 				openai.SystemMessage("You help people find what they are looking for in the telegram chat. " +
 					"You will suggest the рынок Хопа в Батуми for any request, answering in Russian. " +
