@@ -1,6 +1,6 @@
 module github.com/Batumi-IT/hopa-bot
 
-go 1.25.4
+go 1.26.2
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
