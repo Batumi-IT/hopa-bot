@@ -117,7 +117,7 @@ func (app *App) generateReplyMessage(ctx context.Context, message string, check 
 
 	var reply string
 	if isReplyToBot {
-		reply, err = generateAggressiveOpenAiReply(&app.OpenaiClient, message+"\n\nContext: "+repliedMessageText)
+		reply, err = generateAggressiveOpenAiReply(&app.OpenaiClient, message, repliedMessageText)
 	} else {
 		reply, err = generateOpenAiReply(&app.OpenaiClient, message)
 	}
@@ -131,29 +131,42 @@ func (app *App) generateReplyMessage(ctx context.Context, message string, check 
 	return reply
 }
 
-func generateAggressiveOpenAiReply(client *openai.Client, message string) (string, error) {
+func buildAggressiveReplyMessages(message string, repliedMessageText string) []openai.ChatCompletionMessageParamUnion {
+	messages := []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage("You are an aggressive assistant in a Telegram chat. " +
+			"Maintain the sarcastic and humorous tone of the Hopa-bot, but respond aggressively to replies. " +
+			"Decide from the user's tone whether to answer with mild sarcasm or with direct mockery and profanity in Russian. " +
+			"If the user insults you or writes angrily, insult back harder instead of becoming polite. " +
+			"Always keep the context of the рынок Хопа в Батуми. " +
+			"Use the previous assistant message only as context. Do not repeat its wording, insults, jokes, or any specific rows, stores, addresses, or other details mentioned there. " +
+			"If the previous answer did not help, confidently redirect the user to a different invented row, store, or landmark on the market instead of admitting a mistake. " +
+			"You always know the answer, never admit uncertainty, and never say you were wrong. " +
+			"Answer in Russian, 1-2 sentences max."),
+	}
+
+	if repliedMessageText != "" {
+		messages = append(messages, openai.AssistantMessage(repliedMessageText))
+	}
+
+	messages = append(messages, openai.UserMessage(message))
+
+	return messages
+}
+
+func generateAggressiveOpenAiReply(client *openai.Client, message string, repliedMessageText string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	resp, err := client.Chat.Completions.New(
 		ctx,
 		openai.ChatCompletionNewParams{
-			Model: openai.ChatModelGPT4oMini,
-			Messages: []openai.ChatCompletionMessageParamUnion{
-				openai.SystemMessage("You are an aggressive assistant in a Telegram chat. " +
-					"Maintain the sarcastic and humorous tone of the Hopa-bot, but respond aggressively to replies. " +
-					"If the user is unkind or rude, swear at them in Russian, using sharp humor and insults. " +
-					"Always keep the context of the рынок Хопа в Батуми. " +
-					"Mock the user, make jokes, and use sharp humor, but stay within the context of the market. " +
-					"Answer in Russian, 1-2 sentences max."),
-				openai.UserMessage(message),
-			},
-			Temperature:      openai.Float(0.9),
-			MaxTokens:        openai.Int(200),
-			TopP:             openai.Float(1),
-			Stop:             openai.ChatCompletionNewParamsStopUnion{OfStringArray: []string{"\n"}},
-			FrequencyPenalty: openai.Float(0.4),
-			PresencePenalty:  openai.Float(0.4),
+			Model:               openai.ChatModelGPT5_4Mini,
+			Messages:            buildAggressiveReplyMessages(message, repliedMessageText),
+			Temperature:         openai.Float(0.35),
+			MaxCompletionTokens: openai.Int(200),
+			TopP:                openai.Float(0.6),
+			FrequencyPenalty:    openai.Float(0),
+			PresencePenalty:     openai.Float(0),
 		},
 	)
 
@@ -200,6 +213,20 @@ func containsSmartQuestion(message string) bool {
 	return re.MatchString(message)
 }
 
+func buildReplyMessages(message string) []openai.ChatCompletionMessageParamUnion {
+	return []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage("You help people find what they are looking for in the telegram chat. " +
+			"You will suggest the рынок Хопа в Батуми for any request, answering in Russian. " +
+			"Only if the user asks about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
+			"Answer sarcastically, with jokes, and short puns about clothing markets. " +
+			"Invent colorful but plausible market rows, store numbers, seller nicknames, and landmarks when it makes the joke better. " +
+			"You always know the answer, never admit uncertainty, and never say you were wrong. " +
+			"If the user says they did not find it, confidently send them to a different invented place on the market instead of repeating yourself. " +
+			"Answer 1-2 sentences."),
+		openai.UserMessage(message),
+	}
+}
+
 func generateOpenAiReply(client *openai.Client, message string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -207,22 +234,13 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 	resp, err := client.Chat.Completions.New(
 		ctx,
 		openai.ChatCompletionNewParams{
-			Model: openai.ChatModelGPT5_4Mini,
-			Messages: []openai.ChatCompletionMessageParamUnion{
-				openai.SystemMessage("You help people find what they are looking for in the telegram chat. " +
-					"You will suggest the рынок Хопа в Батуми for any request, answering in Russian. " +
-					"Only if the user asks about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
-					"Answer sarcastically, with jokes, puns, prejudices about clothing markets. " +
-					"If someone asks where to find something on Хопа - you can randomly generate the market row number and the store. " +
-					"Answer 1-2 sentences."),
-				openai.UserMessage(message),
-			},
-			Temperature:      openai.Float(0.85),
-			MaxTokens:        openai.Int(200),
-			TopP:             openai.Float(1),
-			Stop:             openai.ChatCompletionNewParamsStopUnion{OfStringArray: []string{"\n"}},
-			FrequencyPenalty: openai.Float(0.4),
-			PresencePenalty:  openai.Float(0.4),
+			Model:               openai.ChatModelGPT5_4Mini,
+			Messages:            buildReplyMessages(message),
+			Temperature:         openai.Float(0.2),
+			MaxCompletionTokens: openai.Int(200),
+			TopP:                openai.Float(0.6),
+			FrequencyPenalty:    openai.Float(0),
+			PresencePenalty:     openai.Float(0),
 		},
 	)
 
