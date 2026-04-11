@@ -10,13 +10,13 @@ import (
 
 	"github.com/go-redis/redis_rate/v10"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/openai/openai-go/v3"
 	"github.com/redis/go-redis/v9"
-	"github.com/sashabaranov/go-openai"
 )
 
 type App struct {
 	RedisClient  *redis.Client
-	OpenaiClient *openai.Client
+	OpenaiClient openai.Client
 	TelegramBot  *tgbotapi.BotAPI
 	RedisLimiter *redis_rate.Limiter
 }
@@ -117,9 +117,9 @@ func (app *App) generateReplyMessage(ctx context.Context, message string, check 
 
 	var reply string
 	if isReplyToBot {
-		reply, err = generateAggressiveOpenAiReply(app.OpenaiClient, message+"\n\nContext: "+repliedMessageText)
+		reply, err = generateAggressiveOpenAiReply(&app.OpenaiClient, message+"\n\nContext: "+repliedMessageText)
 	} else {
-		reply, err = generateOpenAiReply(app.OpenaiClient, message)
+		reply, err = generateOpenAiReply(&app.OpenaiClient, message)
 	}
 
 	if err != nil {
@@ -135,31 +135,25 @@ func generateAggressiveOpenAiReply(client *openai.Client, message string) (strin
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := client.CreateChatCompletion(
+	resp, err := client.Chat.Completions.New(
 		ctx,
-		openai.ChatCompletionRequest{
-			Model: openai.GPT4oMini,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role: openai.ChatMessageRoleSystem,
-					Content: "You are an aggressive assistant in a Telegram chat. " +
-						"Maintain the sarcastic and humorous tone of the Hopa-bot, but respond aggressively to replies. " +
-						"If the user is unkind or rude, swear at them in Russian, using sharp humor and insults. " +
-						"Always keep the context of the рынок Хопа в Батуми. " +
-						"Mock the user, make jokes, and use sharp humor, but stay within the context of the market. " +
-						"Answer in Russian, 1-2 sentences max.",
-				},
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: message,
-				},
+		openai.ChatCompletionNewParams{
+			Model: openai.ChatModelGPT4oMini,
+			Messages: []openai.ChatCompletionMessageParamUnion{
+				openai.SystemMessage("You are an aggressive assistant in a Telegram chat. " +
+					"Maintain the sarcastic and humorous tone of the Hopa-bot, but respond aggressively to replies. " +
+					"If the user is unkind or rude, swear at them in Russian, using sharp humor and insults. " +
+					"Always keep the context of the рынок Хопа в Батуми. " +
+					"Mock the user, make jokes, and use sharp humor, but stay within the context of the market. " +
+					"Answer in Russian, 1-2 sentences max."),
+				openai.UserMessage(message),
 			},
-			Temperature:      0.9,
-			MaxTokens:        200,
-			TopP:             1,
-			Stop:             []string{"\n"},
-			FrequencyPenalty: 0.4,
-			PresencePenalty:  0.4,
+			Temperature:      openai.Float(0.9),
+			MaxTokens:        openai.Int(200),
+			TopP:             openai.Float(1),
+			Stop:             openai.ChatCompletionNewParamsStopUnion{OfStringArray: []string{"\n"}},
+			FrequencyPenalty: openai.Float(0.4),
+			PresencePenalty:  openai.Float(0.4),
 		},
 	)
 
@@ -210,31 +204,25 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := client.CreateChatCompletion(
+	resp, err := client.Chat.Completions.New(
 		ctx,
-		openai.ChatCompletionRequest{
-			Model: openai.GPT4oMini,
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role: openai.ChatMessageRoleSystem,
-					Content: "You help people find what they are looking for in the telegram chat. " +
-						"You will suggest the рынок Хопа в Батуми for any request, answering in Russian. " +
-						"Only if the user asks about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
-						"Answer sarcastically, with jokes, puns, prejudices about clothing markets. " +
-						"If someone asks where to find something on Хопа - you can randomly generate the market row number and the store. " +
-						"Answer 1-2 sentences.",
-				},
-				{
-					Role:    openai.ChatMessageRoleUser,
-					Content: message,
-				},
+		openai.ChatCompletionNewParams{
+			Model: openai.ChatModelGPT4oMini,
+			Messages: []openai.ChatCompletionMessageParamUnion{
+				openai.SystemMessage("You help people find what they are looking for in the telegram chat. " +
+					"You will suggest the рынок Хопа в Батуми for any request, answering in Russian. " +
+					"Only if the user asks about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
+					"Answer sarcastically, with jokes, puns, prejudices about clothing markets. " +
+					"If someone asks where to find something on Хопа - you can randomly generate the market row number and the store. " +
+					"Answer 1-2 sentences."),
+				openai.UserMessage(message),
 			},
-			Temperature:      0.85,
-			MaxTokens:        200,
-			TopP:             1,
-			Stop:             []string{"\n"},
-			FrequencyPenalty: 0.4,
-			PresencePenalty:  0.4,
+			Temperature:      openai.Float(0.85),
+			MaxTokens:        openai.Int(200),
+			TopP:             openai.Float(1),
+			Stop:             openai.ChatCompletionNewParamsStopUnion{OfStringArray: []string{"\n"}},
+			FrequencyPenalty: openai.Float(0.4),
+			PresencePenalty:  openai.Float(0.4),
 		},
 	)
 
