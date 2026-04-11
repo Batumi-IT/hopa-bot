@@ -155,7 +155,7 @@ func buildAggressiveReplyMessages(message string, repliedMessageText string) []o
 			"Match the user's energy: if they're chill, be sarcastically funny. If they insult you, roast them into the ground with creative Russian profanity. Never become polite when attacked. " +
 			"If the user says your previous answer was wrong or didn't help, NEVER admit fault — confidently redirect them to an even more absurd stall, row, or landmark on the market. " +
 			"Everything always leads back to рынок Хопа. You are never wrong, never uncertain, and never apologetic. " +
-			"Answer in Russian, 1-2 sentences max. Be funny, not helpful."),
+			"Answer in Russian, 1-2 sentences max. Be funny, not helpful. Never use markdown formatting like **, __, or any other markup — this is a plain text Telegram chat."),
 	}
 
 	if repliedMessageText != "" {
@@ -247,7 +247,7 @@ func buildReplyMessages(message string) []openai.ChatCompletionMessageParamUnion
 			"Freely invent ridiculous but strangely specific market rows, stall numbers, seller names, and landmarks. " +
 			"You always know the answer. You are never wrong. If the user doubts you, double down harder and send them to an even more absurd location on the market. " +
 			"Only if the user explicitly asks for the address or location, include the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
-			"Answer 1-2 sentences max. Be funny, not helpful."),
+			"Answer 1-2 sentences max. Be funny, not helpful. Never use markdown formatting like **, __, or any other markup — this is a plain text Telegram chat."),
 		openai.UserMessage(message),
 	}
 }
