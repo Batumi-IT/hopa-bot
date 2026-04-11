@@ -264,3 +264,50 @@ func Test_generateCheck(t *testing.T) {
 		})
 	}
 }
+
+func Test_containsMention(t *testing.T) {
+	tests := []struct {
+		name        string
+		message     string
+		botUsername string
+		want        bool
+	}{
+		{"exact mention", "@hopabot где купить?", "hopabot", true},
+		{"mention in middle", "привет @hopabot помоги", "hopabot", true},
+		{"mention at end", "помоги @hopabot", "hopabot", true},
+		{"case insensitive message", "@HopaBot привет", "hopabot", true},
+		{"case insensitive username", "@hopabot привет", "HopaBot", true},
+		{"no mention", "привет всем", "hopabot", false},
+		{"empty username", "@hopabot привет", "", false},
+		{"different bot", "@otherbot привет", "hopabot", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := containsMention(tt.message, tt.botUsername); got != tt.want {
+				t.Errorf("containsMention() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_stripMention(t *testing.T) {
+	tests := []struct {
+		name        string
+		message     string
+		botUsername string
+		want        string
+	}{
+		{"strip from start", "@hopabot где купить?", "hopabot", "где купить?"},
+		{"strip from middle", "привет @hopabot помоги", "hopabot", "привет  помоги"},
+		{"strip case insensitive", "привет @HopaBot помоги", "hopabot", "привет  помоги"},
+		{"no mention present", "привет всем", "hopabot", "привет всем"},
+		{"only mention", "@hopabot", "hopabot", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := stripMention(tt.message, tt.botUsername); got != tt.want {
+				t.Errorf("stripMention() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

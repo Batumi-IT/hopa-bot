@@ -56,8 +56,25 @@ func (app *App) run() {
 			repliedMessageText = update.Message.ReplyToMessage.Text
 		}
 
+		isMention := containsMention(message, app.TelegramBot.Self.UserName)
+		if isMention {
+			message = stripMention(message, app.TelegramBot.Self.UserName)
+			// Plain mention without text and without a thread — just say hi
+			if message == "" && update.Message.ReplyToMessage == nil {
+				reply := tgbotapi.NewMessage(update.Message.Chat.ID, "Хопа!")
+				reply.ReplyToMessageID = update.Message.MessageID
+				app.TelegramBot.Send(reply)
+				continue
+			}
+			// If the mention is a reply to any message, attach that message as context
+			if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.Text != "" {
+				isReplyToBot = true
+				repliedMessageText = update.Message.ReplyToMessage.Text
+			}
+		}
+
 		check := generateCheck(message)
-		if !(check.Stupid || check.Smart) && !isReplyToBot {
+		if !(check.Stupid || check.Smart) && !isReplyToBot && !isMention {
 			continue
 		}
 
@@ -211,6 +228,18 @@ func containsSmartQuestion(message string) bool {
 		`(\s|^)(?:где|как)\s.*(?:хоп[ау]|хоп[ауы]).*\?`,
 	)
 	return re.MatchString(message)
+}
+
+func containsMention(message string, botUsername string) bool {
+	if botUsername == "" {
+		return false
+	}
+	return strings.Contains(strings.ToLower(message), "@"+strings.ToLower(botUsername))
+}
+
+func stripMention(message string, botUsername string) string {
+	re := regexp.MustCompile(`(?i)@` + regexp.QuoteMeta(botUsername))
+	return strings.TrimSpace(re.ReplaceAllString(message, ""))
 }
 
 func buildReplyMessages(message string) []openai.ChatCompletionMessageParamUnion {
