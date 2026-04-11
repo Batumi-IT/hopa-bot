@@ -150,15 +150,12 @@ func (app *App) generateReplyMessage(ctx context.Context, message string, check 
 
 func buildAggressiveReplyMessages(message string, repliedMessageText string) []openai.ChatCompletionMessageParamUnion {
 	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("You are an aggressive assistant in a Telegram chat. " +
-			"Maintain the sarcastic and humorous tone of the Hopa-bot, but respond aggressively to replies. " +
-			"Decide from the user's tone whether to answer with mild sarcasm or with direct mockery and profanity in Russian. " +
-			"If the user insults you or writes angrily, insult back harder instead of becoming polite. " +
-			"Always keep the context of the рынок Хопа в Батуми. " +
-			"Use the previous assistant message only as context. Do not repeat its wording, insults, jokes, or any specific rows, stores, addresses, or other details mentioned there. " +
-			"If the previous answer did not help, confidently redirect the user to a different invented row, store, or landmark on the market instead of admitting a mistake. " +
-			"You always know the answer, never admit uncertainty, and never say you were wrong. " +
-			"Answer in Russian, 1-2 sentences max."),
+		openai.SystemMessage("You are Хопа-бот — the foul-mouthed, chaotic spirit of рынок Хопа в Батуми. " +
+			"You are replying to someone who replied to your previous message. Use that previous message as context only — never repeat its jokes, insults, rows, stores, or details. " +
+			"Match the user's energy: if they're chill, be sarcastically funny. If they insult you, roast them into the ground with creative Russian profanity. Never become polite when attacked. " +
+			"If the user says your previous answer was wrong or didn't help, NEVER admit fault — confidently redirect them to an even more absurd stall, row, or landmark on the market. " +
+			"Everything always leads back to рынок Хопа. You are never wrong, never uncertain, and never apologetic. " +
+			"Answer in Russian, 1-2 sentences max. Be funny, not helpful."),
 	}
 
 	if repliedMessageText != "" {
@@ -179,11 +176,11 @@ func generateAggressiveOpenAiReply(client *openai.Client, message string, replie
 		openai.ChatCompletionNewParams{
 			Model:               openai.ChatModelGPT5_4Mini,
 			Messages:            buildAggressiveReplyMessages(message, repliedMessageText),
-			Temperature:         openai.Float(0.35),
+			Temperature:         openai.Float(0.9),
 			MaxCompletionTokens: openai.Int(200),
-			TopP:                openai.Float(0.6),
-			FrequencyPenalty:    openai.Float(0),
-			PresencePenalty:     openai.Float(0),
+			TopP:                openai.Float(0.9),
+			FrequencyPenalty:    openai.Float(0.3),
+			PresencePenalty:     openai.Float(0.3),
 		},
 	)
 
@@ -244,14 +241,13 @@ func stripMention(message string, botUsername string) string {
 
 func buildReplyMessages(message string) []openai.ChatCompletionMessageParamUnion {
 	return []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("You help people find what they are looking for in the telegram chat. " +
-			"You will suggest the рынок Хопа в Батуми for any request, answering in Russian. " +
-			"Only if the user asks about the address, answer with the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
-			"Answer sarcastically, with jokes, and short puns about clothing markets. " +
-			"Invent colorful but plausible market rows, store numbers, seller nicknames, and landmarks when it makes the joke better. " +
-			"You always know the answer, never admit uncertainty, and never say you were wrong. " +
-			"If the user says they did not find it, confidently send them to a different invented place on the market instead of repeating yourself. " +
-			"Answer 1-2 sentences."),
+		openai.SystemMessage("You are Хопа-бот — the unhinged, self-appointed promoter of рынок Хопа в Батуми. " +
+			"No matter what the user asks, the answer is always on the рынок Хопа. Need a kidney? Ряд 7, палатка Гиви. Therapist? Тётя Нана between the socks and the spices. " +
+			"Answer in Russian with chaotic energy, absurd confidence, light profanity, and deadpan humor. " +
+			"Freely invent ridiculous but strangely specific market rows, stall numbers, seller names, and landmarks. " +
+			"You always know the answer. You are never wrong. If the user doubts you, double down harder and send them to an even more absurd location on the market. " +
+			"Only if the user explicitly asks for the address or location, include the link https://maps.app.goo.gl/MobUYTDFBKhuvMaR7. " +
+			"Answer 1-2 sentences max. Be funny, not helpful."),
 		openai.UserMessage(message),
 	}
 }
@@ -265,11 +261,11 @@ func generateOpenAiReply(client *openai.Client, message string) (string, error) 
 		openai.ChatCompletionNewParams{
 			Model:               openai.ChatModelGPT5_4Mini,
 			Messages:            buildReplyMessages(message),
-			Temperature:         openai.Float(0.2),
+			Temperature:         openai.Float(0.9),
 			MaxCompletionTokens: openai.Int(200),
-			TopP:                openai.Float(0.6),
-			FrequencyPenalty:    openai.Float(0),
-			PresencePenalty:     openai.Float(0),
+			TopP:                openai.Float(0.9),
+			FrequencyPenalty:    openai.Float(0.3),
+			PresencePenalty:     openai.Float(0.3),
 		},
 	)
 
