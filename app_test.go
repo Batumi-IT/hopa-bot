@@ -2,12 +2,25 @@ package main
 
 import "testing"
 
+type messageBoolTest struct {
+	name    string
+	message string
+	want    bool
+}
+
+func runMessageBoolTests(t *testing.T, fn func(string) bool, tests []messageBoolTest) {
+	t.Helper()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := fn(tt.message); got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_containsStupidQuestion(t *testing.T) {
-	tests := []struct {
-		name    string
-		message string
-		want    bool
-	}{
+	runMessageBoolTests(t, containsStupidQuestion, []messageBoolTest{
 		{
 			name:    "1",
 			message: "где купить?",
@@ -123,22 +136,11 @@ func Test_containsStupidQuestion(t *testing.T) {
 			message: "а где ты достал это?",
 			want:    true,
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := containsStupidQuestion(tt.message); got != tt.want {
-				t.Errorf("containsStupidQuestion() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	})
 }
 
 func Test_containsSmartQuestion(t *testing.T) {
-	tests := []struct {
-		name    string
-		message string
-		want    bool
-	}{
+	runMessageBoolTests(t, containsSmartQuestion, []messageBoolTest{
 		{
 			name:    "1",
 			message: "где найти рынок хопа?",
@@ -183,14 +185,7 @@ func Test_containsSmartQuestion(t *testing.T) {
 			message: "акака хопы?",
 			want:    false,
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := containsSmartQuestion(tt.message); got != tt.want {
-				t.Errorf("containsSmartQuestion() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	})
 }
 
 func Test_generateReply(t *testing.T) {
@@ -260,6 +255,55 @@ func Test_generateCheck(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := generateCheck(tt.message); got != tt.want {
 				t.Errorf("generateCheck() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+type botUsernameTest struct {
+	name        string
+	message     string
+	botUsername string
+}
+
+func Test_containsMention(t *testing.T) {
+	tests := []struct {
+		botUsernameTest
+		want bool
+	}{
+		{botUsernameTest{"exact mention", "@hopabot где купить?", "hopabot"}, true},
+		{botUsernameTest{"mention in middle", "привет @hopabot помоги", "hopabot"}, true},
+		{botUsernameTest{"mention at end", "помоги @hopabot", "hopabot"}, true},
+		{botUsernameTest{"case insensitive message", "@HopaBot привет", "hopabot"}, true},
+		{botUsernameTest{"case insensitive username", "@hopabot привет", "HopaBot"}, true},
+		{botUsernameTest{"no mention", "привет всем", "hopabot"}, false},
+		{botUsernameTest{"empty username", "@hopabot привет", ""}, false},
+		{botUsernameTest{"different bot", "@otherbot привет", "hopabot"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := containsMention(tt.message, tt.botUsername); got != tt.want {
+				t.Errorf("containsMention() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_stripMention(t *testing.T) {
+	tests := []struct {
+		botUsernameTest
+		want string
+	}{
+		{botUsernameTest{"strip from start", "@hopabot где купить?", "hopabot"}, "где купить?"},
+		{botUsernameTest{"strip from middle", "привет @hopabot помоги", "hopabot"}, "привет  помоги"},
+		{botUsernameTest{"strip case insensitive", "привет @HopaBot помоги", "hopabot"}, "привет  помоги"},
+		{botUsernameTest{"no mention present", "привет всем", "hopabot"}, "привет всем"},
+		{botUsernameTest{"only mention", "@hopabot", "hopabot"}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := stripMention(tt.message, tt.botUsername); got != tt.want {
+				t.Errorf("stripMention() = %q, want %q", got, tt.want)
 			}
 		})
 	}

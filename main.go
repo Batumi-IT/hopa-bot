@@ -6,7 +6,8 @@ import (
 
 	"github.com/go-redis/redis_rate/v10"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/sashabaranov/go-openai"
+	"github.com/openai/openai-go/v3"
+	"github.com/openai/openai-go/v3/option"
 )
 
 const (
@@ -45,7 +46,7 @@ func main() {
 
 	app := App{
 		RedisClient:  rdb,
-		OpenaiClient: openai.NewClient(openaiToken),
+		OpenaiClient: openai.NewClient(option.WithAPIKey(openaiToken)),
 		TelegramBot:  bot,
 		RedisLimiter: redis_rate.NewLimiter(rdb),
 	}
